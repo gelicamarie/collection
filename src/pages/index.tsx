@@ -1,64 +1,46 @@
 import Head from 'next/head'
-import { Inter } from 'next/font/google'
 import styles from '@/styles/Home.module.css'
-import { useQuery, gql } from '@apollo/client'
 import Image from 'next/image'
+import { useQuery } from 'react-query'
 
-const inter = Inter({ subsets: ['latin'] })
-const query = gql(/* GraphQL */ `
-  query GetNFTs {
-    tokens(
-      networks: [{ network: ETHEREUM, chain: MAINNET }]
-      pagination: { limit: 20 }
-      where: { ownerAddresses: "gelica.eth" }
-    ) {
-      nodes {
-        token {
-          name
-          collectionName
-          tokenId
-          metadata
-        }
-      }
-    }
-  }
-`)
-
-const IPFS_GATWAY = 'https://ipfs.io/ipfs/'
+type NFT = {
+  id: string
+  name: string
+  image: string
+  collectionName: string
+  hidden: boolean
+}
 
 export default function Home() {
-  const { data, loading } = useQuery(query)
-
-  const getTokenImage = ({ src }: { src: string }) => {
-    const hashRegex = /(ipfs:\/\/(?:ipfs\/)?)(\w+)(.*)/
-    const hashOnlyRegex = /(ipfs:\/\/)?(\w+)/
-
-    if (!src.includes('ipfs:/')) return src
-
-    if (hashRegex.test(src)) {
-      return IPFS_GATWAY + src.replace(hashRegex, '$2$3')
-    } else if (hashOnlyRegex.test(src)) {
-      return IPFS_GATWAY + src.replace(hashOnlyRegex, '$2')
-    } else {
-      return src
-    }
+  const options = {
+    method: 'POST',
+    headers: { accept: 'application/json' },
   }
 
-  const tokenData = data?.tokens.nodes.map((node) => node.token).filter((token) => !!token.metadata?.image)
+  const getAssets = async () => {
+    const res = await fetch(
+      `https://api.opensea.io/api/v1/assets?owner=0x0ec22E4c8A5aC71Df8ba792708E9638048C3ed87`,
+      options,
+    )
+    return res.json()
+  }
 
-  const tokens = tokenData?.map((token, i) => {
-    const tokenId = token.name ? token.name : token.collectionName ? token.collectionName : `token-${i}`
+  const { data, isLoading: loading } = useQuery('nfts', getAssets)
 
+  const assets = data?.assets
+
+  const nfts: NFT[] = assets?.map((token: any) => {
     return {
-      id: `${tokenId.replace(/[\s\u00A0]/g, '')}-${token.tokenId}`,
-      tokenName: token.name,
-      collectionName: token.collectionName,
-      img: getTokenImage({
-        src: token.metadata.image,
-      }),
-      other: token.metadata.image,
+      id: token.id,
+      name: token.name,
+      image: token.image_url,
+      collectionName: token.collection.name,
+      hidden: token.hidden,
+      tokenID: token.token_id,
+      creator: token.creator?.user?.username,
     }
   })
+
   return (
     <>
       <Head>
@@ -69,17 +51,13 @@ export default function Home() {
       </Head>
       <main className={styles.main}>
         <div className={styles.grid}>
-          {!!tokens &&
+          {!!nfts &&
             !loading &&
-            tokens.map((token) => {
-              console.log({
-                name: token.tokenName,
-                img: token.img,
-                other: token.other,
-              })
-              return (
-                token?.img && <Image key={token.id} src={token.img} alt={token.tokenName} height={150} width={150} />
-              )
+            nfts.map((nft: NFT) => {
+              if (nft.hidden) return
+              if (!nft.image) return
+
+              return <Image key={nft.image} src={nft.image} alt={nft.name} height={150} width={150} />
             })}
         </div>
       </main>
