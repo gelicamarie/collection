@@ -1,7 +1,6 @@
 import Head from 'next/head'
-import styles from '@/styles/Home.module.css'
-import Image from 'next/image'
 import { useQuery } from 'react-query'
+import { Card } from '@/components/Card'
 
 type NFT = {
   id: string
@@ -13,7 +12,7 @@ type NFT = {
 
 export default function Home() {
   const options = {
-    method: 'POST',
+    method: 'GET',
     headers: { accept: 'application/json' },
   }
 
@@ -49,16 +48,18 @@ export default function Home() {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <main className={styles.main}>
-        <div className={styles.grid}>
-          {!!nfts &&
-            !loading &&
-            nfts.map((nft: NFT) => {
-              if (nft.hidden) return
-              if (!nft.image) return
+      <main className="flex w-full items-center justify-center my-10">
+        <div className="flex w-full max-w-7xl mx-auto">
+          <div className="grid justify-center content-center items-center grid-cols-2 gap-4 w-full ">
+            {!!nfts &&
+              !loading &&
+              nfts.map((nft: NFT) => {
+                if (nft.hidden) return
+                if (!nft.image) return
 
-              return <Image key={nft.image} src={nft.image} alt={nft.name} height={150} width={150} />
-            })}
+                return <Card key={nft.image} img={nft.image} name={nft.name} />
+              })}
+          </div>
         </div>
       </main>
     </>
