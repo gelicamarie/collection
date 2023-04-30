@@ -17,8 +17,9 @@ export const Card = ({ img, name }: { img: string; name: string }) => {
           <div className="flex flex-col  w-full h-full p-3 gap-y-3">
             <div className="flex relative w-full h-full rounded-md aspect-square">
               <Image src={img} alt={name} fill className="rounded-md object-cover" />
-              <div className="absolute right-0  hover:cursor-pointer">
-                <NavigateArrow className="opacity-50 hover:opacity-70" />
+              <div className="absolute w-full rounded-md h-full bg-[radial-gradient(50%_47.88%_at_50.08%_50%,_rgba(2,_2,_2,_0)_0%,_rgba(0,_0,_0,_0.06)_50%,_rgba(0,_0,_0,_0.40)_100%)]" />
+              <div className="absolute right-1 top-1  hover:cursor-pointer">
+                <NavigateArrow className="  text-neutral-300 hover:text-neutral-100 stroke-[1.5]" />
               </div>
             </div>
             <h2 className="font-base font-medium capitalize text-xs text-slate-50">{name}</h2>
