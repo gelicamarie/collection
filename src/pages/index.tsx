@@ -1,6 +1,8 @@
 import Head from 'next/head'
+import clsx from 'clsx'
 import { useQuery } from 'react-query'
 import { Card } from '@/components/Card'
+import Link from 'next/link'
 
 type NFT = {
   id: string
@@ -8,6 +10,8 @@ type NFT = {
   image: string
   collectionName: string
   hidden: boolean
+  tokenID: string
+  link: string
 }
 
 export default function Home() {
@@ -37,8 +41,17 @@ export default function Home() {
       hidden: token.hidden,
       tokenID: token.token_id,
       creator: token.creator?.user?.username,
+      link: token.external_link,
     }
   })
+
+  function randomizeArray(array: any[]) {
+    for (let i = array.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1))
+      ;[array[i], array[j]] = [array[j], array[i]]
+    }
+    return array
+  }
 
   return (
     <>
@@ -50,14 +63,27 @@ export default function Home() {
       </Head>
       <main className="flex w-full items-center justify-center my-10">
         <div className="flex w-full max-w-7xl mx-auto">
-          <div className="grid justify-center content-center items-center grid-cols-2 gap-4 w-full ">
+          <div className="grid justify-center content-center items-center grid-cols-2 gap-y-4 gap-x-20 w-full grid-rows-[auto] relative">
             {!!nfts &&
               !loading &&
-              nfts.map((nft: NFT) => {
-                if (nft.hidden) return
-                if (!nft.image) return
-
-                return <Card key={nft.image} img={nft.image} name={nft.name} />
+              randomizeArray(nfts).map((nft: NFT, i) => {
+                if (nft.hidden || !nft.image || !nft.link) return
+                const index = i + 1
+                return (
+                  <div
+                    key={`${nft.id}-${nft.image}`}
+                    className={clsx(
+                      'flex justify-center odd:items-start even:items-end md:min-h-[80vh]  ',
+                      index === 1 && '!justify-end ',
+                      index % 3 === 0 && 'odd:justify-start ',
+                      index % 5 === 0 && 'odd:justify-start',
+                    )}
+                  >
+                    <Link href={nft.link} target="_blank">
+                      <Card img={nft.image} name={nft.name} />
+                    </Link>
+                  </div>
+                )
               })}
           </div>
         </div>
