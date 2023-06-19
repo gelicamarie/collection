@@ -33,7 +33,14 @@ export const NFTCard = ({ img, name }: { img: string; name: string }) => {
         >
           <div className="flex flex-col  w-full h-full p-2 md:p-3 gap-y-2 sm:gap-y-3">
             <div className="flex relative w-full h-full rounded-md aspect-square">
-              <Image src={img} alt={name} fill className="rounded-md object-cover" quality={100} sizes="540px" />
+              <Image
+                src={img}
+                alt={name}
+                fill
+                className="rounded-md object-cover"
+                quality={100}
+                sizes="160px (min-width: 640px) 288px, (min-width: 1280px) 500px"
+              />
               <div className="absolute right-1 top-1  hover:cursor-pointer">
                 <NavigateArrow className="text-neutral-300 hover:text-neutral-100 stroke-[1.5]" />
               </div>
