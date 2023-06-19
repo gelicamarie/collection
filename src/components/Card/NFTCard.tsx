@@ -18,19 +18,18 @@ export const NFTCard = ({ img, name }: { img: string; name: string }) => {
     })
   }, [])
 
-  return (
+  const card = (
     <div
-      ref={tiltRef}
       className="flex 
-      cursor-pointer
-      justify-center items-center mx-auto w-fit h-fit p-[1px] rounded-lg bg-[radial-gradient(55.28%_55.28%_at_0%_102.89%,_rgba(106,_123,_93,_0.2)_0%,_rgba(0,_0,_0,_0)_100%),radial-gradient(100%_99.98%_at_0%_0%,_rgba(255,_255,_255,_0.2)_0%,_rgba(106,_123,_93,_0.2)_100%)]"
+    cursor-pointer
+    justify-center items-center mx-auto w-fit h-fit p-[1px] rounded-lg bg-[radial-gradient(55.28%_55.28%_at_0%_102.89%,_rgba(106,_123,_93,_0.2)_0%,_rgba(0,_0,_0,_0)_100%),radial-gradient(100%_99.98%_at_0%_0%,_rgba(255,_255,_255,_0.2)_0%,_rgba(106,_123,_93,_0.2)_100%)]"
     >
       <div className="flex w-fit h-fit rounded-lg bg-black">
         <div
           className="flex justify-center w-40 items-center mx-auto backdrop-blur-md rounded-lg
-          sm:w-72
-          xl:w-[400px] 
-          bg-[radial-gradient(107.52%_105.76%_at_0%_-0.91%,_rgba(255,_255,_255,_0.4)_0%,_rgba(255,_255,_255,_0)_100%)]"
+        sm:w-72
+        xl:w-[400px] 
+        bg-[radial-gradient(107.52%_105.76%_at_0%_-0.91%,_rgba(255,_255,_255,_0.4)_0%,_rgba(255,_255,_255,_0)_100%)]"
         >
           <div className="flex flex-col  w-full h-full p-2 md:p-3 gap-y-2 sm:gap-y-3">
             <div className="flex relative w-full h-full rounded-md aspect-square">
@@ -46,5 +45,14 @@ export const NFTCard = ({ img, name }: { img: string; name: string }) => {
         </div>
       </div>
     </div>
+  )
+
+  return (
+    <>
+      <div className="hidden md:block" ref={tiltRef}>
+        {card}
+      </div>
+      <div className="md:hidden">{card}</div>
+    </>
   )
 }
