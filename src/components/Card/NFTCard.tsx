@@ -56,7 +56,7 @@ export const NFTCard = ({ img, name }: { img: string; name: string }) => {
 
   return (
     <>
-      <div className="hidden md:block" ref={tiltRef}>
+      <div className="hidden md:block rounded-md" ref={tiltRef}>
         {card}
       </div>
       <div className="md:hidden">{card}</div>

@@ -1,3 +1,4 @@
+import React from 'react'
 import Head from 'next/head'
 import clsx from 'clsx'
 import { useInfiniteQuery, useQuery } from 'react-query'
@@ -7,7 +8,7 @@ import { GetStaticProps } from 'next'
 import { shortenHash } from '@/utils/shortenHash'
 import { HeadingInfo } from '@/components/HeadingInfo'
 import { ETHERSCAN_API_KEY, OPENSEA_API_KEY } from '@/utils/env'
-
+import { VirtuosoGrid, VirtuosoGridHandle } from 'react-virtuoso'
 type NFT = {
   id: string
   name: string
@@ -74,8 +75,34 @@ export const getStaticProps: GetStaticProps = async () => {
   }
 }
 
+const renderItemContent = ({ i, nft }: { i: number; nft: NFT }) => {
+  if (nft.hidden || !nft.image || !nft.link) return
+  const index = i + 1
+
+  return (
+    <div
+      key={`${nft.id}-${nft.image}`}
+      className={clsx(
+        'flex justify-center h-full w-full',
+        index === 1 && 'sm:!justify-end ',
+        index % 3 === 0 && 'sm:odd:justify-start ',
+        index % 5 === 0 && 'sm:odd:justify-start',
+      )}
+    >
+      <Link href={nft.link} target="_blank">
+        <Card
+          nftImage={nft.image}
+          name={nft.name}
+          contractImage={nft.contractImage}
+          contractAddress={nft.contractAddress}
+          creatorName={nft.creatorName || shortenHash(nft.creatorAddress, 5, 4)}
+        />
+      </Link>
+    </div>
+  )
+}
 export default function Home({ initialNFTs, initialTxn }: { initialNFTs: any; initialTxn: any }) {
-  const { data, isLoading: loading, fetchNextPage, hasNextPage } = useInfiniteQuery({
+  const { data, isLoading: loading, fetchNextPage, hasNextPage, isFetchingNextPage, error } = useInfiniteQuery({
     queryFn: (args) => {
       return getAssets({ cursor: args?.pageParam })
     },
@@ -116,6 +143,18 @@ export default function Home({ initialNFTs, initialTxn }: { initialNFTs: any; in
     }
   })
 
+  //remove nfts with no image, no link, or is hidden
+  const filteredNFTs = nfts?.filter((nft) => nft.image && nft.link && !nft.hidden)
+
+  const gridRef = React.useRef<VirtuosoGridHandle>(null)
+
+  const loadMore = React.useCallback(() => {
+    if (!hasNextPage) return
+    fetchNextPage()
+  }, [fetchNextPage, hasNextPage])
+
+  const memoizedFooter = React.useMemo(() => <div className="w-full h-14" />, [])
+
   return (
     <>
       <Head>
@@ -126,48 +165,25 @@ export default function Home({ initialNFTs, initialTxn }: { initialNFTs: any; in
         <meta property="twitter:creator" content="@0xgel" />
       </Head>
       <main className="flex w-full items-center justify-center my-10">
-        <button
-          className="fixed top-0 right-0 p-4 "
-          onClick={() => {
-            if (!hasNextPage) return
-            fetchNextPage()
-          }}
-        >
-          fetch more nfts
-        </button>
         <div className="flex flex-col w-full max-w-7xl mx-auto items-center">
           <div className="hidden lg:block bg-green-800 w-full max-w-lg max-h-[512px] mt-[10vw] aspect-square fixed rounded-md opacity-80" />
-          <div className="flex flex-col gap-12 md:gap-28 w-full max-w-7xl mx-auto justify-center ">
+          <div className="flex flex-col gap-12 md:gap-28 w-full max-w-7xl mx-auto justify-center overflow-hidden">
             <HeadingInfo publicAddress="0x0ec22E4c8A5aC71Df8ba792708E9638048C3ed87" lastTxnTimestamp={txnData} />
-            <div className="grid justify-center content-center items-center grid-cols-2 gap-y-8 gap-x-1 sm:gap-y-4 sm:gap-x-20 w-full grid-rows-[auto] relative">
-              {!!nfts &&
-                !loading &&
-                nfts.map((nft: NFT, i) => {
-                  if (nft.hidden || !nft.image || !nft.link) return
-                  const index = i + 1
-                  return (
-                    <div
-                      key={`${nft.id}-${nft.image}`}
-                      className={clsx(
-                        'flex justify-center odd:items-start even:items-end sm:min-h-[80vh]  ',
-                        index === 1 && 'sm:!justify-end ',
-                        index % 3 === 0 && 'sm:odd:justify-start ',
-                        index % 5 === 0 && 'sm:odd:justify-start',
-                      )}
-                    >
-                      <Link href={nft.link} target="_blank">
-                        <Card
-                          nftImage={nft.image}
-                          name={nft.name}
-                          contractImage={nft.contractImage}
-                          contractAddress={nft.contractAddress}
-                          creatorName={nft.creatorName || shortenHash(nft.creatorAddress, 5, 4)}
-                        />
-                      </Link>
-                    </div>
-                  )
-                })}
-            </div>
+            <VirtuosoGrid
+              ref={gridRef}
+              endReached={() => {
+                console.log('end reached')
+                loadMore()
+              }}
+              data={filteredNFTs}
+              useWindowScroll
+              itemContent={(index, item) => {
+                return renderItemContent({ i: index, nft: item })
+              }}
+              listClassName="grid justify-center content-center items-center grid-cols-2 gap-y-8 gap-x-1 sm:gap-y-2 sm:gap-x-24 w-full grid-rows-[auto] relative px-4 lg:px-0
+              [&_.virtuoso-grid-item]:flex [&_.virtuoso-grid-item]:sm:min-h-[100vh]  even:[&_.virtuoso-grid-item]:items-end  odd:[&_.virtuoso-grid-item]:items-start "
+              components={{ Footer: () => memoizedFooter }}
+            />
           </div>
         </div>
       </main>
