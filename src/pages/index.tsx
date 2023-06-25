@@ -180,8 +180,8 @@ export default function Home({ initialNFTs, initialTxn }: { initialNFTs: any; in
               itemContent={(index, item) => {
                 return renderItemContent({ i: index, nft: item })
               }}
-              listClassName="grid justify-center content-center items-center grid-cols-2 gap-y-8 gap-x-1 sm:gap-y-2 sm:gap-x-24 w-full grid-rows-[auto] relative px-4 lg:px-0
-              [&_.virtuoso-grid-item]:flex [&_.virtuoso-grid-item]:sm:min-h-[100vh]  even:[&_.virtuoso-grid-item]:items-end  odd:[&_.virtuoso-grid-item]:items-start "
+              listClassName="grid justify-center content-center items-center grid-cols-2 gap-y-8 gap-x-1 sm:gap-y-4 sm:gap-x-24 w-full grid-rows-[auto] relative px-4 lg:px-0
+              [&_.virtuoso-grid-item]:flex [&_.virtuoso-grid-item]:sm:min-h-[88vh]  even:[&_.virtuoso-grid-item]:items-end  odd:[&_.virtuoso-grid-item]:items-start "
               components={{ Footer: () => memoizedFooter }}
             />
           </div>
