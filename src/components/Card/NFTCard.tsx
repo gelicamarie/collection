@@ -40,6 +40,9 @@ export const NFTCard = ({ img, name }: { img: string; name: string }) => {
                 className="rounded-md object-cover"
                 quality={100}
                 sizes="160px (min-width: 640px) 288px, (min-width: 1280px) 500px"
+                onError={(e) => {
+                  e.currentTarget.src = 'https://via.placeholder.com/500'
+                }}
               />
               <div className="absolute right-1 top-1  hover:cursor-pointer">
                 <NavigateArrow className="text-neutral-300 hover:text-neutral-100 stroke-[1.5]" />

@@ -4,13 +4,17 @@ const { hostname } = require('os')
 const nextConfig = {
   reactStrictMode: true,
   images: {
-    //add arweave
+    dangerouslyAllowSVG: true,
     domains: ['gateway.ipfs.io', 'arweave.net', 'cloudfront.net'],
 
     remotePatterns: [
       {
         protocol: 'https',
         hostname: '**.com',
+      },
+      {
+        protocol: 'https',
+        hostname: '**.ens.domains',
       },
       {
         protocol: 'http',

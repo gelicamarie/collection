@@ -103,6 +103,14 @@ const renderItemContent = ({ i, nft }: { i: number; nft: NFT }) => {
     </div>
   )
 }
+
+const tempFilterImages = (nfts: NFT[]) => {
+  //remove ipfs images  or anything with api.apiflash.com
+  const filter = ['https://ipfs.io', 'api.apiflash.com', 'bravanft.io']
+  return nfts.filter((nft) => {
+    return !filter.some((f) => nft.image.includes(f))
+  })
+}
 export default function Home({ initialNFTs, initialTxn }: { initialNFTs: any; initialTxn: any }) {
   const { data, isLoading: loading, fetchNextPage, hasNextPage, isFetchingNextPage, error } = useInfiniteQuery({
     queryFn: (args) => {
@@ -141,9 +149,7 @@ export default function Home({ initialNFTs, initialTxn }: { initialNFTs: any; in
   })
 
   //filter out ipfs for now - TODO: handle ipfs images
-  const filteredNFTs = nfts?.filter(
-    (nft) => !!nft.image && !nft.image.includes('https://ipfs.io') && nft.link && !nft.hidden,
-  )
+  const filteredNFTs = tempFilterImages(nfts || []).filter((nft) => !nft.hidden)
 
   const gridRef = React.useRef<VirtuosoGridHandle>(null)
 
