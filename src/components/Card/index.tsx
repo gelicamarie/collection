@@ -2,35 +2,28 @@ import React from 'react'
 import { NFTCard } from './NFTCard'
 import Image from 'next/image'
 import { Circle } from '../Circle'
+import { shortenHash } from '@/utils/shortenHash'
 
 export const Card = ({
-  contractImage,
   name,
   nftImage,
   contractAddress,
-  creatorName,
+  description,
 }: {
-  contractImage?: string
   name: string
   nftImage: string
   contractAddress?: string
-  creatorName?: string
+  description?: string
 }) => {
   return (
-    <div className="flex flex-col gap-3 cursor-default">
+    <div
+      className="flex flex-col gap-3 cursor-default w-40         sm:w-72
+    xl:w-[400px]"
+    >
       <NFTCard img={nftImage} name={name} />
-      <div className="flex gap-2 items-center">
+      <div className="flex gap-4 items-center">
         <div className="w-5 h-5 md:w-7 md:h-7 relative ">
-          {!!contractImage ? (
-            <Image
-              src={contractImage}
-              alt={name}
-              fill
-              className="rounded-full object-cover"
-              quality={100}
-              sizes="28px"
-            />
-          ) : !!contractAddress ? (
+          {!!contractAddress ? (
             <Circle publicAddress={contractAddress} size={28} />
           ) : (
             <Circle
@@ -39,7 +32,7 @@ export const Card = ({
             />
           )}
         </div>
-        <h3 className="font-base font-medium text-xxs  md:text-sm text-slate-50">{creatorName}</h3>
+        <h3 className="font-base font-medium text-xxs  md:text-sm text-slate-50 line-clamp-2">{description}</h3>
       </div>
     </div>
   )

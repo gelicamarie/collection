@@ -13,27 +13,30 @@ type NFT = {
   id: string
   name: string
   image: string
-  collectionName: string
-  hidden: boolean
   tokenID: string
   link: string
-  contractImage?: string
+  // collectionName: string
+  hidden: boolean
+  // link: string
+  // contractImage?: string
   contractAddress?: string
-  creatorName?: string
-  creatorAddress?: string
+  // creatorName?: string
+  // creatorAddress?: string
+  description?: string
 }
 
 const getAssets = async ({ cursor }: { cursor?: string }) => {
+  const chain = 'ethereum'
+  const account = '0x0ec22E4c8A5aC71Df8ba792708E9638048C3ed87'
+
   const params = new URLSearchParams({
-    owner: '0x0ec22E4c8A5aC71Df8ba792708E9638048C3ed87',
-    order_direction: 'desc',
     limit: '8',
-    include_orders: 'false',
   })
+  if (cursor) {
+    params.append('next', cursor)
+  }
 
-  if (cursor) params.append('cursor', cursor)
-
-  const res = await fetch(`https://api.opensea.io/api/v1/assets?${params.toString()}`, {
+  const res = await fetch(`https://api.opensea.io/api/v2/chain/${chain}/account/${account}/nfts?${params.toString()}`, {
     method: 'GET',
     headers: { accept: 'application/json', 'X-API-KEY': OPENSEA_API_KEY },
   })
@@ -76,7 +79,7 @@ export const getStaticProps: GetStaticProps = async () => {
 }
 
 const renderItemContent = ({ i, nft }: { i: number; nft: NFT }) => {
-  if (nft.hidden || !nft.image || !nft.link) return
+  if (!nft.image) return
   const index = i + 1
 
   return (
@@ -93,9 +96,8 @@ const renderItemContent = ({ i, nft }: { i: number; nft: NFT }) => {
         <Card
           nftImage={nft.image}
           name={nft.name}
-          contractImage={nft.contractImage}
           contractAddress={nft.contractAddress}
-          creatorName={nft.creatorName || shortenHash(nft.creatorAddress, 5, 4)}
+          description={nft.description}
         />
       </Link>
     </div>
@@ -124,27 +126,24 @@ export default function Home({ initialNFTs, initialTxn }: { initialNFTs: any; in
     initialData: initialTxn,
   })
 
-  const assets = data?.pages?.map((page) => page?.assets).flat()
-
+  const assets = data?.pages?.map((page) => page?.nfts).flat()
   const nfts: NFT[] | undefined = assets?.map((token: any) => {
     return {
-      id: token.id,
+      id: token.identifier,
       name: token.name,
       image: token.image_url,
-      collectionName: token.collection.name,
-      hidden: token.hidden,
-      tokenID: token.token_id,
-      creator: token.creator?.user?.username,
-      link: token.external_link,
-      contractImage: token.asset_contract.image_url,
-      contractAddress: token.asset_contract.address,
-      creatorName: token.creator.user?.username,
-      creatorAddress: token.creator.address,
+      tokenID: token.identifier,
+      contractAddress: token.contract,
+      link: token.opensea_url,
+      hidden: !!token.is_disabled || !!token.is_nsfw,
+      description: token.description,
     }
   })
 
-  //remove nfts with no image, no link, or is hidden
-  const filteredNFTs = nfts?.filter((nft) => nft.image && nft.link && !nft.hidden)
+  //filter out ipfs for now - TODO: handle ipfs images
+  const filteredNFTs = nfts?.filter(
+    (nft) => !!nft.image && !nft.image.includes('https://ipfs.io') && nft.link && !nft.hidden,
+  )
 
   const gridRef = React.useRef<VirtuosoGridHandle>(null)
 
@@ -172,7 +171,6 @@ export default function Home({ initialNFTs, initialTxn }: { initialNFTs: any; in
             <VirtuosoGrid
               ref={gridRef}
               endReached={() => {
-                console.log('end reached')
                 loadMore()
               }}
               data={filteredNFTs}
